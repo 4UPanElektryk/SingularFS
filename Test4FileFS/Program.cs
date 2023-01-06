@@ -14,8 +14,10 @@ namespace Test4FileFS
                 FS.Save();
             }
             FS.files = FS.Load();
-            FS.files.Add(new FSFile("Hello2.txt", "Hello, World!2"));
+            string path = Console.ReadLine();
+            FS.files.Add(new FSFile(path, File.ReadAllText(path)));
             FS.Save();
+            Console.ReadLine();
             foreach (FSFile item in FS.Load())
             {
                 File.WriteAllText(item.Name, item.Content);

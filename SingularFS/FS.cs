@@ -80,9 +80,31 @@ namespace SingularFS
 			}
 			return newstring;
 		}
-		public static void Encrypt(string key)
+		public static bool Exists(string path)
 		{
-			
+			foreach (FSFile item in files)
+			{
+				if (item.Name == path)
+				{
+					return true;
+				}
+			}
+			return false;
 		}
-	}
+		public static string ReadAllText(string path)
+		{
+			foreach (FSFile item in files)
+			{
+				if (item.Name == path)
+				{
+					return item.Content;
+				}
+			}
+			throw new FileNotFoundException();
+		}
+		public static void WriteAllText(string path, string content)
+		{
+			files.Add(new FSFile(path, content));
+		}
+    }
 }
