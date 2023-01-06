@@ -28,9 +28,6 @@
     <ExternalConsole>true</ExternalConsole>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SingularFS">
-      <HintPath>..\SingularFS\bin\Release\netstandard2.0\SingularFS.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
   </ItemGroup>
   <ItemGroup>
@@ -39,6 +36,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SingularFS\SingularFS.csproj">
+      <Project>{f6538e1c-11df-4a5a-b2c3-1ff9c0057f27}</Project>
+      <Name>SingularFS</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

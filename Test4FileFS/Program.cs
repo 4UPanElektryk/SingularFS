@@ -14,7 +14,7 @@ namespace Test4FileFS
                 FS.Save();
             }
             FS.files = FS.Load();
-            FS.files.Add(new FSFile("Hello2.txt", "Hello, World!2"));
+            FS.Add(new FSFile("Hello1.txt", "Hello, World!1"));
             FS.Save();
             foreach (FSFile item in FS.Load())
             {
