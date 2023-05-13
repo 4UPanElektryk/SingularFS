@@ -83,7 +83,7 @@ namespace SingularFS.Utils
 				}
 				else if (args[0] == "-I")
 				{
-					if (args[1] == "-d")
+					if (args[1] == "-f")
 					{
 						FS local = FSMod.Import(args[2]);
 						string filename = args[3].Split('\\').Last();
@@ -91,7 +91,7 @@ namespace SingularFS.Utils
 						FSMod.Export(args[2], local);
 						return;
 					}
-					if (args[1] == "-f")
+					if (args[1] == "-d")
 					{
 						FS local = FSMod.Import(args[2]);
 						foreach (string item in Directory.GetFiles(args[3]))
