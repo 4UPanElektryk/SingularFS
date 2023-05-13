@@ -8,24 +8,21 @@ namespace Test4FileFS
 	{
 		public static void Main(string[] args)
 		{
-			new FS("data.sfsa");
-			if (!File.Exists("data.sfsa"))
+			FS local = new FS();
+			if (File.Exists("userdata.fs_"))
 			{
-				FS.Save();
+				local = FSMod.Import("userdata.fs_");
 			}
-			FS.files = FS.Load();
             string path = Console.ReadLine();
-            FS.files.Add(new FSFile(path, File.ReadAllText(path)));
-			FS.Save();
-			Console.ReadLine();
-			foreach (FSFile item in FS.Load())
+			local.WriteAllText(path, Console.ReadLine());
+			FSMod.Export("userdata.fs_",local);
+			foreach (HeaderData item in local.files)
 			{
-				File.WriteAllText(item.Name, item.Content);
-				Console.WriteLine(item.Name);
-				Console.WriteLine(item.Content);
 				Console.WriteLine();
+				Console.WriteLine(item.FileName);
+				Console.WriteLine(local.ReadAllText(item.FileName));
 			}
-			Console.ReadLine();
+			Console.ReadKey(true);
 		}
 	}
 }

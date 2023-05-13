@@ -10,119 +10,85 @@ namespace SingularFS
 {
 	public class FS
 	{
-		public static string Path;
-		public static List<FSFile> files;
-		private static string EncryptionKey;
-		public FS(string path)
+		public string Data;
+		public List<HeaderData> files;
+		public FS(string data, List<HeaderData> Headers)
 		{
-			Path = path;
-			if (File.Exists(path))
-				files = Import();
-			else
-				files = new List<FSFile>();
+			Data = data;
+			files = Headers;
 		}
-		public static void FileSave(FSFile file)
+		public FS()
 		{
-			for (int i = 0; i < files.Count; i++)
-			{
-				if (files[i].Name == file.Name)
-				{
-					files[i] = file;
-					return;
-				}
-			}
-			files.Add(file);
+			Data = "";
+			files = new List<HeaderData>();
 		}
-		public static bool Exists(string name)
+		public bool Exists(string path)
 		{
-
-		}
-		public static FSFile Load(string name)
-		{
-			foreach (FSFile item in files)
+			foreach (HeaderData item in files)
 			{
-				if (item.Name == name)
-				{
-					return item;
-				}
-			}
-			return null;
-		}
-		public static List<FSFile> Import()
-		{
-			List<FSFile> Read = new List<FSFile>();
-			string raw = File.ReadAllText(Path, Encoding.ASCII);
-			string headers = raw.Split(char.ConvertFromUtf32(5).ToCharArray())[0];
-			string data = raw.Substring(headers.Length);
-			int currentindex = 0;
-			string[] headersext = headers.Split(char.ConvertFromUtf32(4).ToCharArray());
-
-
-			foreach (string item in headersext)
-			{
-				string[] fdata = item.Split(char.ConvertFromUtf32(6).ToCharArray());
-				string name = fdata[0];
-				int length = int.Parse(fdata[1]);
-				string datatobox = GetFormData(data,currentindex,length);
-				currentindex += length;
-				Read.Add(new FSFile(name,datatobox));
-            }
-			return Read;
-		}
-		public static void Export()
-		{
-			string end = "";
-			foreach (FSFile item in files)
-			{
-				string output = item.Name + char.ConvertFromUtf32(6) + item.Length.ToString() + char.ConvertFromUtf32(5);
-				end += output;
-			}
-            foreach (FSFile item in files)
-			{
-				end += item.Content; 
-			}
-			File.WriteAllText(Path,end,Encoding.UTF32);
-		}
-		private static string GetFormData(string data, int startindex, int length)
-		{
-			string newstring = "";
-			
-			char[] dataraw = data.ToCharArray().Skip(startindex).ToArray();
- 			for (int i = 0; i < dataraw.Length; i++)
-			{
-				if (i == length)
-				{
-					return newstring;
-				}
-				newstring += dataraw[i];
-			}
-			return newstring;
-		}
-		public static bool Exists(string path)
-		{
-			foreach (FSFile item in files)
-			{
-				if (item.Name == path)
+				if (item.FileName == path)
 				{
 					return true;
 				}
 			}
 			return false;
 		}
-		public static string ReadAllText(string path)
+		public string ReadAllText(string path)
 		{
-			foreach (FSFile item in files)
+			foreach (HeaderData item in files)
 			{
-				if (item.Name == path)
+				if (item.FileName == path)
 				{
-					return item.Content;
+					return Data.Substring(item.StartIndex,item.Length);
 				}
 			}
 			throw new FileNotFoundException();
 		}
-		public static void WriteAllText(string path, string content)
+		public void Delete(string path)
 		{
-			files.Add(new FSFile(path, content));
+			for (int i = 0; i < files.Count; i++)
+			{
+				if (files[i].FileName == path)
+				{
+					int diff = 0 - files[i].Length;
+					string preData = Data.Substring(0, files[i].StartIndex);
+					string pastData = Data.Substring(files[i].StartIndex + files[i].Length);
+					Data = preData + pastData;
+					for (int j = i; j < files.Count(); j++)
+					{
+						HeaderData d = files[j];
+						d.StartIndex -= diff;
+						files[j] = d;
+					}
+					files.Remove(files[i]);
+					return;
+				}
+			}
+		}
+		public void WriteAllText(string path, string content)
+		{
+			for (int i = 0; i < files.Count; i++)
+			{
+				if (files[i].FileName == path)
+				{
+					int diff = content.Length - files[i].Length;
+					string preData = Data.Substring(0, files[i].StartIndex);
+					string pastData = Data.Substring(files[i].StartIndex + files[i].Length);
+					Data = preData + content + pastData;
+					for (int j = i; j < files.Count(); j++)
+					{
+						HeaderData d = files[j];
+						d.StartIndex -= diff;
+						files[j] = d;
+					}
+					HeaderData dd = files[i];
+					dd.Length -= content.Length;
+					files[i] = dd;
+					return;
+				}
+			}
+			files.Add(new HeaderData() { FileName =path, Length = content.Length, StartIndex = Data.Length });
+			Data += content;
 		}
     }
 }
