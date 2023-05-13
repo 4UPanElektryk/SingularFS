@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SingularFSUtils
+namespace SingularFS.Utils
 {
 	internal class Program
 	{
@@ -21,9 +21,33 @@ namespace SingularFSUtils
 					"-I -d <SFSfile> <dir>            - Imports all files in a spesified directory to a SingularFS archive\n" +
 					"-D <SFSfile> <filename>          - Deletes specified file\n" +
 					"-L <SFSfile>                     - Lists all files in a SingularFS archive\n" +
-					"");
+					"<SFSfile>                        - Directory will be created with the content of SFSfile");
 				return;
             }
+			else if(args.Length == 1)
+			{
+				if (!args[0].EndsWith(".fs_\"") && !args[0].EndsWith(".fs_"))
+				{
+					return;
+				}
+				FS local = new FS();
+				try
+				{
+					local = FSMod.Import(args[0]);
+				}
+				catch (Exception)
+				{
+					return;
+				}
+				string dir = args[0].Split('\\').Last().Split('.').First();
+				Directory.CreateDirectory(dir);
+				foreach (HeaderData item in local.files)
+				{
+					File.WriteAllText(dir + "\\" + item.FileName, local.ReadAllText(item.FileName));
+					Console.WriteLine(item.FileName);
+				}
+				return;
+			}
 			else if(args.Length == 2)
 			{
                 if (args[0] == "-L")

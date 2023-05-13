@@ -10,7 +10,7 @@ namespace SingularFS
 	{
 		public static FS Import(string Path)
 		{
-			string raw = File.ReadAllText(Path, Encoding.ASCII);
+			string raw = File.ReadAllText(Path, Encoding.Unicode);
 			string headersraw = raw.Split(Convert.ToChar(1))[0];
 			List<HeaderData> headers = new List<HeaderData>();
 			int i = 0;
@@ -48,7 +48,7 @@ namespace SingularFS
 			temp[raw.Length - 1] = Convert.ToChar(1);
 			raw = new string(temp);
 			raw += filesystem.Data;
-			File.WriteAllText(Path, raw);
+			File.WriteAllText(Path, raw,Encoding.Unicode);
 		}
 	}
 }

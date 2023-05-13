@@ -5,8 +5,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{EB593E5C-7D1D-4311-AD4C-F520DB1F7259}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <RootNamespace>Test4FileFS</RootNamespace>
-    <AssemblyName>Test4FileFS</AssemblyName>
+    <RootNamespace>SingularFS.Tests</RootNamespace>
+    <AssemblyName>SingularFS.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>

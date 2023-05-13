@@ -1,21 +1,25 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using SingularFS;
 
-namespace Test4FileFS
+namespace SingularFS.Tests
 {
 	class MainClass
 	{
 		public static void Main(string[] args)
 		{
 			FS local = new FS();
-			if (File.Exists("userdata.fs_"))
+			if (File.Exists("plik.fs_"))
 			{
-				local = FSMod.Import("userdata.fs_");
+				local = FSMod.Import("plik.fs_");
 			}
-            string path = Console.ReadLine();
-			local.WriteAllText(path, Console.ReadLine());
-			FSMod.Export("userdata.fs_",local);
+			Random random = new Random();
+			for (int i = 0; i < 800; i++)
+			{
+				local.WriteAllText(random.Next() + ".txt", Convert.ToBase64String(Encoding.UTF8.GetBytes(random.Next().ToString())));
+			}
+			FSMod.Export("plik.fs_",local);
 			foreach (HeaderData item in local.files)
 			{
 				Console.WriteLine();

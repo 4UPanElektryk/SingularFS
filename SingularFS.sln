@@ -2,11 +2,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.32804.182
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test4FileFS", "Test4FileFS\Test4FileFS.csproj", "{EB593E5C-7D1D-4311-AD4C-F520DB1F7259}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingularFS.Tests", "Test4FileFS\SingularFS.Tests.csproj", "{EB593E5C-7D1D-4311-AD4C-F520DB1F7259}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SingularFS", "SingularFS\SingularFS.csproj", "{F6538E1C-11DF-4A5A-B2C3-1FF9C0057F27}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingularFSUtils", "SingularFSUtils\SingularFSUtils.csproj", "{B09FBF10-8732-4840-958B-79777DD3F936}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingularFS.Utils", "SingularFSUtils\SingularFS.Utils.csproj", "{B09FBF10-8732-4840-958B-79777DD3F936}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
