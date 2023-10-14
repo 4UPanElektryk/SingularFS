@@ -14,13 +14,15 @@ namespace SingularFS.Utils
 		{
 			if (args.Length == 0)
 			{
-                Console.WriteLine("SingularFS Utilities Help:\n" +
+				Console.WriteLine(
+					"SingularFS Utilities Help:\n" +
 					"-E -f <SFSfile> <filename> <dir> - Exports a files to a directory\n" +
 					"-E -d <SFSfile> <dir>            - Exports all files to a directory\n" +
 					"-I -f <SFSfile> <path>           - Imports a file to a SingularFS archive\n" +
 					"-I -d <SFSfile> <dir>            - Imports all files in a spesified directory to a SingularFS archive\n" +
 					"-D <SFSfile> <filename>          - Deletes specified file\n" +
 					"-L <SFSfile>                     - Lists all files in a SingularFS archive\n" +
+					"-C <SFSfile>                     - Creates an SingularFS archive\n" +
 					"<SFSfile>                        - Directory will be created with the content of SFSfile");
 				return;
             }
@@ -57,6 +59,13 @@ namespace SingularFS.Utils
 					{
 						Console.WriteLine(item.FileName);
 					}
+					return;
+				}
+				if (args[0] == "-C")
+				{
+					FS local = new FS();
+					local.WriteAllText("created@", DateTime.UtcNow.ToString("HH:mm:ss dd.MM.yyyy"));
+					FSMod.Export(args[1], local);
 					return;
 				}
 			}
