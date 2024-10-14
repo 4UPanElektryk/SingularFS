@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <OutputType>Library</OutputType>
     <PackageProjectUrl>https://github.com/4UPanElektryk/SingularFS</PackageProjectUrl>
+    <AllowUnsafeBlocks>False</AllowUnsafeBlocks>
   </PropertyGroup>
 
 </Project>

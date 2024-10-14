@@ -1,54 +1,69 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data;
 using System.IO;
-using System.Text;
+
 
 namespace SingularFS
 {
 	public class FSMod
 	{
-		public static FS Import(string Path)
+		private static IFileSystem[] fileSystems =
 		{
-			string raw = File.ReadAllText(Path, Encoding.Unicode);
-			string headersraw = raw.Split(Convert.ToChar(1))[0];
-			List<HeaderData> headers = new List<HeaderData>();
-			int i = 0;
-			HeaderData l = new HeaderData();
-			foreach (var item in headersraw.Split(Convert.ToChar(0)))
+			new Version1FS.FS()
+		};
+		public static uint ChecksumFast(byte[] arr)
+		{
+			if (arr.Length == 0) return 0;
+
+			uint sum0 = 0, sum1 = 0, sum2 = 0, sum3 = 0;
+
+			for (var i = 0; i < arr.Length / 4; i+=4)
 			{
-				if (i == 0)
+				sum0 += arr[i];
+				sum1 += arr[i+1];
+				sum2 += arr[i+2];
+				sum3 += arr[i+3];
+			}
+			for (var i = 0; i < arr.Length % 4 ; i++)
+			{
+				switch (i % 4)
 				{
-					l.FileName = item;
-					i++;
-				}
-				else if(i == 1)
-				{
-					l.StartIndex = int.Parse(item);
-					i++;
-				}
-				else if (i == 2)
-				{
-					l.Length = int.Parse(item);
-					headers.Add(l);
-					i = 0;
+					case 0: sum0 += arr[i]; break;
+					case 1: sum1 += arr[i]; break;
+					case 2: sum2 += arr[i]; break;
+					case 3: sum3 += arr[i]; break;
 				}
 			}
-			string data = raw.Substring(headersraw.Length + 1);
-			return new FS(data,headers);
+			var sum = sum3 + (sum2 << 8) + (sum1 << 16) + (sum0 << 24);
+			return sum;
 		}
-		public static void Export(string Path, FS filesystem)
+		public static IFileSystem Import(string Path)
 		{
-			string raw = "";
-			foreach (HeaderData item in filesystem.files)
+			byte[] bytes = File.ReadAllBytes(Path);
+			if (bytes.Length == 0) return null;
+			if (bytes[0] == 0) throw new Exception("Not yet implemented or invalid file");
+			foreach (IFileSystem item in fileSystems)
 			{
-				raw += item.FileName + Convert.ToChar(0) + item.StartIndex + Convert.ToChar(0) + item.Length + Convert.ToChar(0);
+				if (item.Version == bytes[0])
+				{
+					IExportable ready = Activator.CreateInstance(item.GetType()) as IExportable;
+					ready.Import(bytes);
+					return ready as IFileSystem;
+				}
 			}
-			var temp = raw.ToCharArray(); 
-			temp[raw.Length - 1] = Convert.ToChar(1);
-			raw = new string(temp);
-			raw += filesystem.Data;
-			File.WriteAllText(Path, raw,Encoding.Unicode);
+			return null;
+		}
+		public static void Export(string Path, IFileSystem filesystem)
+		{
+			IExportable exportable = filesystem as IExportable;
+			File.WriteAllBytes(Path,exportable.Export());
+		}
+		public static IFileSystem CreateNew(byte Version = 0)
+		{
+			if (Version == 0)
+			{
+				Version = (byte)(fileSystems.Length - 1);
+			}
+			return Activator.CreateInstance(fileSystems[Version].GetType()) as IFileSystem;
 		}
 	}
 }
