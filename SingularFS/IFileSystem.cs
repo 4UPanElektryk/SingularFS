@@ -9,7 +9,7 @@ namespace SingularFS
 		void Delete(string path);
 		bool Exists(string path);
 		string[] GetAllFiles();
-		FileData GetFileData(string path);
+		FileMetadata GetFileData(string path);
 		byte[] ReadAllBytes(string path);
 		void WriteAllBytes(string path, byte[] content);
 		string ReadAllText(string path);

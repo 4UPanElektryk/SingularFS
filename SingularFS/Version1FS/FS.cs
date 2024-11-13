@@ -32,16 +32,16 @@ namespace SingularFS.Version1FS
 			}
 			return strings;
 		}
-		public FileData GetFileData(string path)
+		public FileMetadata GetFileData(string path)
 		{
 			foreach (var item in files)
 			{
 				if (item.FileName == path)
 				{
-					return item;
+					return new FileMetadata() { CreationTime = item.CreationTime, Name = item.FileName, Offset = item.Offset, Size = item.Data.Length };
 				}
 			}
-			return default;
+			throw new FileNotFoundException("File does not exist", path);
 		}
 		public string ReadAllText(string path)
 		{
@@ -81,9 +81,18 @@ namespace SingularFS.Version1FS
 				CreationTime = DateTime.FromBinary(BitConverter.ToInt64(bytes, 5)),
 				FileHeaderLength = BitConverter.ToInt32(bytes, 13),
 			};
-			byte[] bytesFileHeaders = (byte[])bytes.Skip(17).Take(header.FileHeaderLength);
-			byte[] bytesFileData = (byte[])bytes.Skip(header.FileHeaderLength + 17);
-
+			byte[] bytesFileHeaders = bytes.Skip(17).Take(header.FileHeaderLength).ToArray();
+			byte[] bytesFileData = bytes.Skip(header.FileHeaderLength + 17).ToArray();
+			files = CalcFileFromTableEntry(bytesFileHeaders);
+			for (int i = 0; i < files.Count - 1; i++)
+			{
+				FileData data = files[i];
+				data.Data = bytesFileData.Skip(data.Offset).Take(files[i+1].Offset - data.Offset).ToArray();
+				files[i] = data;
+			}
+			FileData d = files[files.Count - 1];
+			d.Data = bytesFileData.Skip(d.Offset).ToArray();
+			files[files.Count - 1] = d;
 		}
 		public byte[] Export()
 		{
@@ -117,10 +126,9 @@ namespace SingularFS.Version1FS
 			for (int j = 0; j < files.Count; j++)
 			{
 				FileData d = files[j];
-				files.Remove(d);
 				d.Offset = startoffset;
 				startoffset += d.Data.Length;
-				files.Add(d);
+				files[j] = d;
 				byte[] arr = CalcFileTableEntry(d);
 				totalfileheadersize += arr.Length;
 				bytesoffiletable.AddRange(arr);
@@ -142,15 +150,20 @@ namespace SingularFS.Version1FS
 			#endregion
 			return bytes.ToArray();
 		}
-		private FileData CalcFileFromTableEntry(byte[] bytes) 
+		private List<FileData> CalcFileFromTableEntry(byte[] bytes) 
 		{
+			if (bytes.Length == 0)
+			{
+				return new List<FileData>();
+			}
 			FileData f = new FileData();
 			byte[] name = bytes.Skip(1).Take(bytes[0]).ToArray();
 			f.FileName = Encoding.ASCII.GetString(name);
-			f.CreationTime = DateTime.FromBinary(BitConverter.ToInt64(bytes,bytes.Length - 13));
-			f.Offset = BitConverter.ToInt32(bytes,bytes.Length - 5);
-			CalcFileFromTableEntry(bytes);
-			return f;
+			f.CreationTime = DateTime.FromBinary(BitConverter.ToInt64(bytes,bytes[0] + 1));
+			f.Offset = BitConverter.ToInt32(bytes, bytes[0] + 9);
+			List<FileData> files = new List<FileData> { f };
+			files.AddRange(CalcFileFromTableEntry(bytes.Skip(bytes[0]+13).ToArray()));
+			return files;
 		}
 		private byte[] CalcFileTableEntry(FileData file)
 		{

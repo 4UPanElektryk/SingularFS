@@ -16,23 +16,23 @@ namespace SingularFS.Utils
 			{
 				Console.WriteLine(
 					"SingularFS Utilities Help:\n" +
-					"-E -f <SFSfile> <filename> <dir> - Exports a files to a directory\n" +
+					"-E -f <SFSfile> <filename> <dir> - Exports a file to a directory\n" +
 					"-E -d <SFSfile> <dir>            - Exports all files to a directory\n" +
 					"-I -f <SFSfile> <path>           - Imports a file to a SingularFS archive\n" +
 					"-I -d <SFSfile> <dir>            - Imports all files in a spesified directory to a SingularFS archive\n" +
 					"-D <SFSfile> <filename>          - Deletes specified file\n" +
 					"-L <SFSfile>                     - Lists all files in a SingularFS archive\n" +
-					"-C <SFSfile>                     - Creates an SingularFS archive\n" +
+					"-C <SFSfile>                     - Creates a SingularFS archive\n" +
 					"<SFSfile>                        - Directory will be created with the content of SFSfile");
 				return;
-            }
+			}
 			else if(args.Length == 1)
 			{
 				if (!args[0].EndsWith(".fs_\"") && !args[0].EndsWith(".fs_"))
 				{
 					return;
 				}
-				FS local = new FS();
+				IFileSystem local = FSMod.CreateNew();
 				try
 				{
 					local = FSMod.Import(args[0]);
@@ -43,28 +43,35 @@ namespace SingularFS.Utils
 				}
 				string dir = args[0].Split('\\').Last().Split('.').First();
 				Directory.CreateDirectory(dir);
-				foreach (HeaderData item in local.files)
+				foreach (string item in local.GetAllFiles())
 				{
-					File.WriteAllText(dir + "\\" + item.FileName, local.ReadAllText(item.FileName));
-					Console.WriteLine(item.FileName);
+					File.WriteAllBytes(dir + "\\" + item, local.ReadAllBytes(item));
+					Console.WriteLine(item);
 				}
 				return;
 			}
 			else if(args.Length == 2)
 			{
-                if (args[0] == "-L")
+				if (args[0] == "-L")
 				{
-                    FS local = FSMod.Import(args[1]);
-					foreach (HeaderData item in local.files)
+					IFileSystem local = FSMod.Import(args[1]);
+					Console.ForegroundColor = ConsoleColor.Green;
+					Console.WriteLine("Last Write Time     Size          Name");
+					Console.WriteLine("-----------------   ------------- ----");
+					//Console.WriteLine("19.02.2020  15:30   2,147,483,647 Nazwa Pliku.txt");
+					Console.ResetColor();
+					foreach (string item in local.GetAllFiles())
 					{
-						Console.WriteLine(item.FileName);
+						FileMetadata metadata = local.GetFileData(item);
+						string size = metadata.Size.ToString("n0").PadLeft(13,' ');
+						Console.WriteLine($"{metadata.CreationTime:dd.MM.yyyy  HH:mm}   {size} {metadata.Name}");
 					}
 					return;
 				}
 				if (args[0] == "-C")
 				{
-					FS local = new FS();
-					local.WriteAllText("created@", DateTime.UtcNow.ToString("HH:mm:ss dd.MM.yyyy"));
+					IFileSystem local = FSMod.CreateNew();
+					//local.WriteAllText("created@", DateTime.UtcNow.ToString("HH:mm:ss dd.MM.yyyy"));
 					FSMod.Export(args[1], local);
 					return;
 				}
@@ -73,7 +80,7 @@ namespace SingularFS.Utils
 			{
 				if (args[0] == "-D")
 				{
-					FS local = FSMod.Import(args[1]);
+					IFileSystem local = FSMod.Import(args[1]);
 					local.Delete(args[2]);
 					FSMod.Export(args[1],local);
 				}
@@ -82,11 +89,11 @@ namespace SingularFS.Utils
 			{
 				if (args[0] == "-E" && args[1] == "-d")
 				{
-					FS local = FSMod.Import(args[2]);
-					foreach (HeaderData item in local.files)
+					IFileSystem local = FSMod.Import(args[2]);
+					foreach (string item in local.GetAllFiles())
 					{
-						File.WriteAllText(args[3] + "\\" + item.FileName, local.ReadAllText(item.FileName));
-						Console.WriteLine(item.FileName);
+						File.WriteAllBytes(args[3] + "\\" + item, local.ReadAllBytes(item));
+						Console.WriteLine(item);
 					}
 					return;
 				}
@@ -94,19 +101,19 @@ namespace SingularFS.Utils
 				{
 					if (args[1] == "-f")
 					{
-						FS local = FSMod.Import(args[2]);
+						IFileSystem local = FSMod.Import(args[2]);
 						string filename = args[3].Split('\\').Last();
-						local.WriteAllText(filename, File.ReadAllText(args[3]));
+						local.WriteAllBytes(filename, File.ReadAllBytes(args[3]));
 						FSMod.Export(args[2], local);
 						return;
 					}
 					if (args[1] == "-d")
 					{
-						FS local = FSMod.Import(args[2]);
+						IFileSystem local = FSMod.Import(args[2]);
 						foreach (string item in Directory.GetFiles(args[3]))
 						{
 							string filename = item.Split('\\').Last();
-							local.WriteAllText(filename, File.ReadAllText(item));
+							local.WriteAllBytes(filename, File.ReadAllBytes(item));
 						}
 						FSMod.Export(args[2], local);
 						return;
@@ -117,10 +124,10 @@ namespace SingularFS.Utils
 			{
 				if (args[0] == "-E" && args[1] == "-f")
 				{
-					FS local = FSMod.Import(args[2]);
-					File.WriteAllText(args[4] +"\\"+ args[3], local.ReadAllText(args[3]));
-                    Console.WriteLine(args[4] + "\\" + args[3]);
-                    return;
+					IFileSystem local = FSMod.Import(args[2]);
+					File.WriteAllBytes(args[4] + "\\" + args[3], local.ReadAllBytes(args[3]));
+					Console.WriteLine(args[4] + "\\" + args[3]);
+					return;
 				}
 			}
 		}

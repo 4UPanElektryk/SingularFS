@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace SingularFS.Version1FS
 {
-    public struct FileData
+    internal struct FileData
     {
         public string FileName;
         public int Offset;
